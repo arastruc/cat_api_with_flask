@@ -1,6 +1,5 @@
-import mongoengine as me
-
-
+from .db import me
+     
 class Cat(me.Document):
     id = me.StringField(primary_key=True)
     name = me.StringField(max_length=200, required=True)
