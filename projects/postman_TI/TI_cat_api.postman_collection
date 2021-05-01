@@ -1,0 +1,431 @@
+{
+	"info": {
+		"_postman_id": "23e49343-3984-4b13-aa38-f49e4691b417",
+		"name": "TI",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "POST_Dobby_OK",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status test\", () =>  {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Id is returned\", () =>  {\r",
+							"   const id_response = pm.response.json().id;\r",
+							"    pm.expect(id_response).to.be.a('string');\r",
+							"    pm.expect(id_response).to.not.be.null;\r",
+							"    pm.environment.set(\"id_cat\", id_response);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Dobby\",\r\n  \"color\": \"roux\",\r\n  \"id\": \"\",\r\n  \"sex\": \"Male\",\r\n  \"foods\": [\r\n    \"souris\", \"saumon\"\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api.url}}/v1/cats/",
+					"host": [
+						"{{api.url}}"
+					],
+					"path": [
+						"v1",
+						"cats",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST_Cat_KO_BadRequest",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status test\", () =>  {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status test\", () =>  {\r",
+							"   const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson.errors).to.not.be.null;\r",
+							"    pm.expect(responseJson.errors.message).to.not.be.null;\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"color\": \"roux\",\r\n  \"id\": \"\",\r\n  \"sex\": \"Male\",\r\n  \"foods\": [\r\n    \"souris\", \"saumon\"\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api.url}}/v1/cats/",
+					"host": [
+						"{{api.url}}"
+					],
+					"path": [
+						"v1",
+						"cats",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET_dobby",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status test\", () =>  {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body test\", () =>  {\r",
+							"   const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson.name).to.eql('Dobby');\r",
+							"    pm.expect(responseJson.color).to.eql('roux');\r",
+							"    pm.expect(responseJson.sex).to.eql('Male');\r",
+							"    pm.expect(responseJson.foods).to.be.an('array').that.is.not.empty;\r",
+							"    pm.expect(responseJson.foods).to.have.lengthOf(2);\r",
+							"    pm.expect(responseJson.foods).to.eql([\"souris\", \"saumon\"]);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api.url}}/v1/cats/{{id_cat}}",
+					"host": [
+						"{{api.url}}"
+					],
+					"path": [
+						"v1",
+						"cats",
+						"{{id_cat}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET_dobby Copy eats herbs",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status test\", () =>  {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"api_url = pm.variables.get(\"api.url\");\r",
+							"cat_id = pm.variables.get(\"id_cat\");\r",
+							"\r",
+							"request = {\r",
+							"  url: api_url+\"/v1/cats/\"+cat_id , \r",
+							"  method: 'GET'}\r",
+							"\r",
+							"pm.sendRequest(request ,  (err, response) => {\r",
+							"\r",
+							"    pm.test(\"Dobby has been modified, he eats herbs now\", () =>  {\r",
+							"\r",
+							"    responseGet = response.json();\r",
+							"    pm.expect(responseGet.name).to.eql('Dobby');\r",
+							"    pm.expect(responseGet.color).to.eql('roux');\r",
+							"    pm.expect(responseGet.sex).to.eql('Male');\r",
+							"    pm.expect(responseGet.foods).to.be.an('array').that.is.not.empty;\r",
+							"    pm.expect(responseGet.foods).to.have.lengthOf(3);\r",
+							"    pm.expect(responseGet.foods).to.eql([\"souris\", \"saumon\", \"herbe à chat\"]);\r",
+							"});\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Dobby\",\r\n  \"color\": \"roux\",\r\n  \"id\": \"{{id_cat}}\",\r\n  \"sex\": \"Male\",\r\n  \"foods\": [\r\n    \"souris\", \"saumon\", \"herbe à chat\"\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api.url}}/v1/cats/{{id_cat}}",
+					"host": [
+						"{{api.url}}"
+					],
+					"path": [
+						"v1",
+						"cats",
+						"{{id_cat}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PATCH_dobby become vegetarian",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status test\", () =>  {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"api_url = pm.variables.get(\"api.url\");\r",
+							"cat_id = pm.variables.get(\"id_cat\");\r",
+							"\r",
+							"request = {\r",
+							"  url: api_url+\"/v1/cats/\"+cat_id , \r",
+							"  method: 'GET'}\r",
+							"\r",
+							"pm.sendRequest(request ,  (err, response) => {\r",
+							"\r",
+							"    pm.test(\"Dobby has been modified, he becomes vegetarian\", () =>  {\r",
+							"\r",
+							"    responseGet = response.json();\r",
+							"    pm.expect(responseGet.name).to.eql('Dobby');\r",
+							"    pm.expect(responseGet.color).to.eql('roux');\r",
+							"    pm.expect(responseGet.sex).to.eql('Male');\r",
+							"    pm.expect(responseGet.foods).to.be.an('array').that.is.not.empty;\r",
+							"    pm.expect(responseGet.foods).to.have.lengthOf(1);\r",
+							"    pm.expect(responseGet.foods).to.eql([\"herbe à chat\"]);\r",
+							"});\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": \"{{id_cat}}\",\r\n  \"foods\": [\r\n    \"herbe à chat\"\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api.url}}/v1/cats/{{id_cat}}",
+					"host": [
+						"{{api.url}}"
+					],
+					"path": [
+						"v1",
+						"cats",
+						"{{id_cat}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE_Dobby",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status test\", () =>  {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"api_url = pm.variables.get(\"api.url\");\r",
+							"cat_id = pm.variables.get(\"id_cat\");\r",
+							"\r",
+							"request = {\r",
+							"  url: api_url+\"/v1/cats/\"+cat_id , \r",
+							"  method: 'GET'}\r",
+							"\r",
+							"pm.sendRequest(request ,  (err, response) => {\r",
+							"\r",
+							"    pm.test(\"Dobby has been erased, return 404, \", () =>  {\r",
+							"\r",
+							"        console.log(response.code)\r",
+							"        pm.expect(response.code).to.eql(404);\r",
+							"        pm.expect(response.status).to.eql('NOT FOUND');\r",
+							"        \r",
+							"   \r",
+							"});\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Dobby\",\r\n  \"color\": \"roux\",\r\n  \"id\": \"\",\r\n  \"sex\": \"Male\",\r\n  \"foods\": [\r\n    \"souris\", \"saumon\"\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api.url}}/v1/cats/{{id_cat}}",
+					"host": [
+						"{{api.url}}"
+					],
+					"path": [
+						"v1",
+						"cats",
+						"{{id_cat}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET Cat List without limit",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status test\", () =>  {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body test\", () =>  {\r",
+							"   const responseJson = pm.response.json();\r",
+							"   pm.expect(responseJson.cats).to.be.an('array').that.is.not.empty;\r",
+							"   pm.expect(responseJson.cats).to.have.lengthOf(20);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{api.url}}/v1/cats/",
+					"host": [
+						"{{api.url}}"
+					],
+					"path": [
+						"v1",
+						"cats",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET Cat List without limit 15",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status test\", () =>  {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body test\", () =>  {\r",
+							"   const responseJson = pm.response.json();\r",
+							"   pm.expect(responseJson.cats).to.be.an('array').that.is.not.empty;\r",
+							"   pm.expect(responseJson.cats).to.have.lengthOf(10);\r",
+							"   pm.expect(responseJson.pagination.currentPage).to.be.eql(2);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{api.url}}/v1/cats/?limit=10&page=2",
+					"host": [
+						"{{api.url}}"
+					],
+					"path": [
+						"v1",
+						"cats",
+						""
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "10"
+						},
+						{
+							"key": "page",
+							"value": "2"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
