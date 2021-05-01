@@ -10,11 +10,13 @@ cat = api.model(
     'Cat',
     {'name': fields.String(description='The name', required=True),
      'color': fields.String(description='The color', required=True),
-     'id': fields.String(description='The color', required=True),
+     'id': fields.String(description='The technical id'),
      'sex': fields.String(enum=["Male", "Female", "Other"]),
      'foods': fields.List(
         fields.String(description='Favourite foods')
-    ), })
+    ),
+    })
+
 
 pagination = api.model('Pagination', {'totalItems': fields.Integer(),
                                       'totalPages': fields.Integer(),
@@ -42,19 +44,20 @@ def handle_no_result_exception(error):
 class CatsHandler(Resource):
     '''handle cats'''
 
-    @ api.doc(params={'limit': {'description': 'limit', 'in': 'query', 'type': 'int'}})
-    @ api.doc(params={'page': {'description': 'page', 'in': 'query', 'type': 'int'}})
+    # Add a security to check that parameters are integers
+
+    @ api.doc(params={'limit': {'description': 'Number of result per page (default 20)', 'in': 'query', 'type': 'int'}})
+    @ api.doc(params={'page': {'description': 'Current Page (default 1)', 'in': 'query', 'type': 'int'}})
     @ api.doc(responses={200: 'OK'})
     @ api.doc(responses={404: 'Not Found'})
     @ api.doc(responses={500: 'Internal Error'})
-    @ api.param('limit', description='description', type='boolean')
     @ api.marshal_with(cat_list)
     def get(self):
 
         try:
-            limit = request.args.get("limit") or 30
+            limit = request.args.get("limit") or "20"
             page = request.args.get("page") or "1"
-            cats = Cat.objects.all().paginate(page=int(page) or 1, per_page=int(limit) or 30)
+            cats = Cat.objects.all().paginate(page=int(page), per_page=int(limit))
 
             return {'cats': cats.items,
                     'pagination': {'totalItems': cats.total,
@@ -68,6 +71,7 @@ class CatsHandler(Resource):
 
     @ api.doc(body=cat)
     @ api.doc(responses={201: 'Created'})
+    @ api.doc(responses={400: 'Bad Request'})
     @ api.doc(responses={403: 'Not Authorized'})
     @ api.doc(responses={500: 'Internal Error'})
     @ api.expect(cat, validate=True)
@@ -77,27 +81,13 @@ class CatsHandler(Resource):
         cat = Cat(**body).save()
         return {'id': cat.id}, 201
 
-    @ api.doc(responses={201: 'Created'})
-    @ api.doc(responses={403: 'Not Authorized'})
-    @ api.doc(responses={500: 'Internal Error'})
-    @ api.expect(cat, validate=True)
-    def put(self):
-        body = api.payload
-
-        try:
-            Cat.objects.get(id=body['id']).update(**body)
-            return Response(status=200)
-
-        except Cat.DoesNotExist:
-            raise NoResultFound
-
 
 @ api.route('/<id>')
 class CatHandler(Resource):
 
     '''handle single cat'''
 
-    @ api.doc(params={'id': 'cat_id'})
+    @ api.doc(params={'id': 'Technical cat id'})
     @ api.doc(responses={200: 'OK'})
     @ api.doc(responses={404: 'Not Found'})
     @ api.doc(responses={500: 'Internal Error'})
@@ -108,6 +98,7 @@ class CatHandler(Resource):
         except Cat.DoesNotExist:
             raise NoResultFound
 
+    @ api.doc(params={'id': 'Technical cat id'})
     @ api.doc(responses={204: 'Deleted'})
     @ api.doc(responses={404: 'Not Found'})
     @ api.doc(responses={500: 'Internal Error'})
@@ -115,6 +106,37 @@ class CatHandler(Resource):
         try:
             Cat.objects.get(id=id).delete()
             return Response(status=204)
+
+        except Cat.DoesNotExist:
+            raise NoResultFound
+
+    @ api.doc(params={'id': 'Technical cat id'})
+    @ api.doc(responses={200: 'OK'})
+    @ api.doc(responses={400: 'Bad Request'})
+    @ api.doc(responses={403: 'Not Authorized'})
+    @ api.doc(responses={500: 'Internal Error'})
+    @ api.expect(cat, validate=True)
+    def put(self, id):
+        body = api.payload
+
+        try:
+            Cat.objects.get(id=id).update(**body)
+            return Response(status=200)
+
+        except Cat.DoesNotExist:
+            raise NoResultFound
+
+    @ api.doc(responses={200: 'OK'})
+    @ api.doc(responses={400: 'Bad Request'})
+    @ api.doc(responses={403: 'Not Authorized'})
+    @ api.doc(responses={500: 'Internal Error'})
+    @ api.expect(cat, validate=False)
+    def patch(self, id):
+        body = api.payload
+
+        try:
+            Cat.objects.get(id=id).update(**body)
+            return Response(status=200)
 
         except Cat.DoesNotExist:
             raise NoResultFound
