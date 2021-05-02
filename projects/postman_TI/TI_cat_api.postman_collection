@@ -40,14 +40,13 @@
 					}
 				},
 				"url": {
-					"raw": "{{api.url}}/v1/cats/",
+					"raw": "{{api.url}}/v1/cats",
 					"host": [
 						"{{api.url}}"
 					],
 					"path": [
 						"v1",
-						"cats",
-						""
+						"cats"
 					]
 				}
 			},
@@ -87,14 +86,13 @@
 					}
 				},
 				"url": {
-					"raw": "{{api.url}}/v1/cats/",
+					"raw": "{{api.url}}/v1/cats",
 					"host": [
 						"{{api.url}}"
 					],
 					"path": [
 						"v1",
-						"cats",
-						""
+						"cats"
 					]
 				}
 			},
@@ -365,14 +363,13 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{api.url}}/v1/cats/",
+					"raw": "{{api.url}}/v1/cats",
 					"host": [
 						"{{api.url}}"
 					],
 					"path": [
 						"v1",
-						"cats",
-						""
+						"cats"
 					]
 				}
 			},
@@ -404,14 +401,13 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{api.url}}/v1/cats/?limit=10&page=2",
+					"raw": "{{api.url}}/v1/cats?limit=10&page=2",
 					"host": [
 						"{{api.url}}"
 					],
 					"path": [
 						"v1",
-						"cats",
-						""
+						"cats"
 					],
 					"query": [
 						{
