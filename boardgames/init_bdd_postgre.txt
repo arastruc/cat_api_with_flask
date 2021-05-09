@@ -1,0 +1,16 @@
+CREATE TABLE public.boardgame (
+	id serial NOT NULL,
+	publisher text NOT NULL,
+	"name" text NOT NULL,
+	author text NOT NULL,
+	minplayer int4 NOT NULL,
+	maxplayer int4 NOT NULL,
+	duration int4 NOT NULL,
+	CONSTRAINT boardgame_pkey PRIMARY KEY (id)
+);
+
+INSERT INTO Boardgame (Name,Publisher,MinPlayer,MaxPlayer,Author,Duration) VALUES
+	 ('Cappuccino','Matagot',2,4,'Charles Chevallier',15),
+	 ('Carpe Diem','Alea',2,4,'Stefan Feld',75),
+	 ('Nidavelir','GRRE Games',2,5,'Serge Laget',45),
+	 ('Bastille','Queen Games',3,4,'Christophe Behre',60);

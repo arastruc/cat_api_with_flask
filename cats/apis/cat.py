@@ -8,8 +8,8 @@ api = Namespace('cats', description='Cats related operations')
 
 cat = api.model(
     'Cat',
-    {'name': fields.String(description='The name', required=True),
-     'color': fields.String(description='The color', required=True),
+    {'name': fields.String(description='The name', required=True, example='Garfield'),
+     'color': fields.String(description='The color', required=True, example='roux'),
      'id': fields.String(description='The technical id'),
      'sex': fields.String(enum=["Male", "Female", "Other"]),
      'foods': fields.List(
@@ -20,7 +20,7 @@ cat = api.model(
 
 pagination = api.model('Pagination', {'totalItems': fields.Integer(),
                                       'totalPages': fields.Integer(),
-                                      'itemsPerPage': fields.Integer(),
+                                      'maxitemsPerPage': fields.Integer(),
                                       'currentPage': fields.Integer(),
                                       }
                        )
@@ -30,17 +30,7 @@ cat_list = {
 }
 
 
-class NoResultFound(Exception):
-    pass
-
-
-@ api.errorhandler(NoResultFound)
-def handle_no_result_exception(error):
-    '''Return a custom not found error message and 404 status code'''
-    return {'message': 'Not Found'}, 404
-
-
-@ api.route('/')
+@ api.route('')
 class CatsHandler(Resource):
     '''handle cats'''
 
@@ -48,6 +38,9 @@ class CatsHandler(Resource):
 
     @ api.doc(params={'limit': {'description': 'Number of result per page (default 20)', 'in': 'query', 'type': 'int'}})
     @ api.doc(params={'page': {'description': 'Current Page (default 1)', 'in': 'query', 'type': 'int'}})
+    @ api.doc(params={'name': {'description': 'The name', 'in': 'query', 'type': 'string'}})
+    @ api.doc(params={'color': {'description': 'The color', 'in': 'query', 'type': 'string'}})
+    @ api.doc(params={'sex': {'description': 'The sex (Male Female or Other)', 'in': 'query', 'type': 'string'}})
     @ api.doc(responses={200: 'OK'})
     @ api.doc(responses={404: 'Not Found'})
     @ api.doc(responses={500: 'Internal Error'})
@@ -55,19 +48,25 @@ class CatsHandler(Resource):
     def get(self):
 
         try:
+
+            cats_document = getFilteredCats(search_criteria=(
+                "name", "color", "sex"))
+
             limit = request.args.get("limit") or "20"
             page = request.args.get("page") or "1"
-            cats = Cat.objects.all().paginate(page=int(page), per_page=int(limit))
+
+            cats = cats_document.paginate(page=int(page), per_page=int(limit))
 
             return {'cats': cats.items,
-                    'pagination': {'totalItems': cats.total,
-                                   'totalPages': cats.pages,
-                                   'itemsPerPage': cats.per_page,
-                                   'currentPage': cats.page,
-                                   }}, 200
+                    'pagination': {
+                        'totalItems': cats.total,
+                        'totalPages': cats.pages,
+                        'maxitemsPerPage': cats.per_page,
+                        'currentPage': cats.page,
+                    }}, 200, {'X-Total-Count': cats.total}
 
         except Cat.DoesNotExist:
-            raise NoResultFound
+            api.abort(404, {'error': 'Not Found', "code": 803})
 
     @ api.doc(body=cat)
     @ api.doc(responses={201: 'Created'})
@@ -96,7 +95,8 @@ class CatHandler(Resource):
         try:
             return Cat.objects.get(id=id)
         except Cat.DoesNotExist:
-            raise NoResultFound
+            api.abort(
+                404, f'unable to get cat with id {id} as he doesn\'t exist', error='Not Found', custom_code=803)
 
     @ api.doc(params={'id': 'Technical cat id'})
     @ api.doc(responses={204: 'Deleted'})
@@ -108,7 +108,8 @@ class CatHandler(Resource):
             return Response(status=204)
 
         except Cat.DoesNotExist:
-            raise NoResultFound
+            api.abort(404,
+                      f'unable to delete cat with id {id} as he doesn\'t exist', error='Not Found', custom_code=803)
 
     @ api.doc(params={'id': 'Technical cat id'})
     @ api.doc(responses={200: 'OK'})
@@ -124,7 +125,8 @@ class CatHandler(Resource):
             return Response(status=200)
 
         except Cat.DoesNotExist:
-            raise NoResultFound
+            api.abort(
+                404, f'unable to modify cat with id {id} as he doesn\'t exist', error='Not Found', custom_code=803)
 
     @ api.doc(responses={200: 'OK'})
     @ api.doc(responses={400: 'Bad Request'})
@@ -139,4 +141,17 @@ class CatHandler(Resource):
             return Response(status=200)
 
         except Cat.DoesNotExist:
-            raise NoResultFound
+            api.abort(
+                404,  f'unable to modify cat with id {id} as he doesn\'t exist', error='Not Found', custom_code=803)
+
+
+def getFilteredCats(*, search_criteria):
+
+    criteria_dict = {}
+
+    for criteria in search_criteria:
+        criteria_value = request.args.get(criteria)
+        if criteria_value:
+            criteria_dict[criteria] = criteria_value
+
+    return Cat.objects(**criteria_dict) if search_criteria else Cat.objects()

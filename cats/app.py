@@ -6,7 +6,7 @@ from dao.db import initialize_db
 app = Flask(__name__)
 api.init_app(app)
 
-
+app.config['ERROR_404_HELP'] = False
 app.config['MONGODB_SETTINGS'] = {
     'db': 'your_database',
     'host': 'localhost',
