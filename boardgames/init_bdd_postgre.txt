@@ -1,7 +1,8 @@
 CREATE TABLE public.boardgame (
 	id serial NOT NULL,
+	boardgame_id uuid NULL DEFAULT uuid_generate_v4(),
 	publisher text NOT NULL,
-	"name" text NOT NULL,
+	name text NOT NULL,
 	author text NOT NULL,
 	minplayer int4 NOT NULL,
 	maxplayer int4 NOT NULL,
