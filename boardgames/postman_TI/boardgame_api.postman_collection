@@ -1,0 +1,363 @@
+{
+	"info": {
+		"_postman_id": "f19bb5f9-d398-4667-95bd-46a8d9504fba",
+		"name": "TI SQL ALCHEMY",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "POST_NewGame_OK",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status test\", () =>  {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Id is returned\", () =>  {\r",
+							"   const id_response = pm.response.json().id;\r",
+							"    pm.expect(id_response).to.be.a('string');\r",
+							"    pm.expect(id_response).to.not.be.null;\r",
+							"    pm.environment.set(\"id_boardgame\", id_response);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"id\":\"\",\r\n  \"name\": \"test_jeu\",\r\n  \"publisher\": \"publisher\",\r\n  \"minplayer\": 1,\r\n  \"maxplayer\": 4,\r\n  \"duration\": 35,\r\n   \"authors\": [\r\n   {\r\n          \"id\": \"fc6bcbdc-96d1-415d-b226-b1a6c4d40438\",\r\n          \"firstName\": \"Stefan\",\r\n          \"lastName\": \"Feld\"\r\n        }\r\n  ]\r\n}\r\n\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api.url}}/v1/boardgames",
+					"host": [
+						"{{api.url}}"
+					],
+					"path": [
+						"v1",
+						"boardgames"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST_GAME2_KO_BadRequest_noAuthor",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status test\", () =>  {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status test\", () =>  {\r",
+							"   const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson.errors).to.not.be.null;\r",
+							"    pm.expect(responseJson.errors.message).to.not.be.null;\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"id\":\"\",\r\n  \"name\": \"test_jeu\",\r\n  \"publisher\": \"publisher\",\r\n  \"minplayer\": 1,\r\n  \"maxplayer\": 4,\r\n  \"duration\": 35\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api.url}}/v1/boardgames",
+					"host": [
+						"{{api.url}}"
+					],
+					"path": [
+						"v1",
+						"boardgames"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET_NewGame",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status test\", () =>  {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body test\", () =>  {\r",
+							"   const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson).to.not.be.null;\r",
+							"    pm.expect(responseJson.name).to.eql('test_jeu');\r",
+							"    pm.expect(responseJson.minplayer).to.eql(1);\r",
+							"    pm.expect(responseJson.maxplayer).to.eql(4);\r",
+							"    pm.expect(responseJson.duration).to.eql(35);\r",
+							"    pm.expect(responseJson.publisher).to.eql('publisher');\r",
+							"    pm.expect(responseJson.authors).to.be.an('array').that.is.not.empty;\r",
+							"    pm.expect(responseJson.authors).to.have.lengthOf(1);\r",
+							"    pm.expect(responseJson.authors[0].id).to.eql(\"fc6bcbdc-96d1-415d-b226-b1a6c4d40438\");\r",
+							"    pm.expect(responseJson.authors[0].firstName).to.eql(\"Stefan\");\r",
+							"    pm.expect(responseJson.authors[0].lastName).to.eql(\"Feld\");\r",
+							"});\r",
+							"\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api.url}}/v1/boardgames/{{id_boardgame}}",
+					"host": [
+						"{{api.url}}"
+					],
+					"path": [
+						"v1",
+						"boardgames",
+						"{{id_boardgame}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET_NewGame nex publisher",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status test\", () =>  {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"api_url = pm.variables.get(\"api.url\");\r",
+							"id_boardgame = pm.variables.get(\"id_boardgame\");\r",
+							"\r",
+							"request = {\r",
+							"  url: api_url+\"/v1/boardgames/\"+id_boardgame , \r",
+							"  method: 'GET'}\r",
+							"\r",
+							"pm.sendRequest(request ,  (err, response) => {\r",
+							"\r",
+							"    pm.test(\"Dobby has been modified, he has a new publisher\", () =>  {\r",
+							"\r",
+							"    responseGet = response.json();\r",
+							"    pm.expect(responseGet).to.not.be.null;\r",
+							"    pm.expect(responseGet.name).to.eql('test_jeu');\r",
+							"    pm.expect(responseGet.minplayer).to.eql(1);\r",
+							"    pm.expect(responseGet.maxplayer).to.eql(4);\r",
+							"    pm.expect(responseGet.duration).to.eql(35);\r",
+							"    pm.expect(responseGet.publisher).to.eql('new_publisher');\r",
+							"    pm.expect(responseGet.authors).to.be.an('array').that.is.not.empty;\r",
+							"    pm.expect(responseGet.authors).to.have.lengthOf(1);\r",
+							"    pm.expect(responseGet.authors[0].id).to.eql(\"fc6bcbdc-96d1-415d-b226-b1a6c4d40438\");\r",
+							"    pm.expect(responseGet.authors[0].firstName).to.eql(\"Stefan\");\r",
+							"    pm.expect(responseGet.authors[0].lastName).to.eql(\"Feld\");\r",
+							"});\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"id\": \"{{id_boardgame}}\",\r\n  \"name\": \"test_jeu\",\r\n  \"publisher\": \"new_publisher\",\r\n  \"minplayer\": 1,\r\n  \"maxplayer\": 4,\r\n  \"duration\": 35,\r\n   \"authors\": [\r\n   {\r\n          \"id\": \"fc6bcbdc-96d1-415d-b226-b1a6c4d40438\",\r\n          \"firstName\": \"Stefan\",\r\n          \"lastName\": \"Feld\"\r\n        }\r\n  ]\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api.url}}/v1/boardgames/{{id_boardgame}}",
+					"host": [
+						"{{api.url}}"
+					],
+					"path": [
+						"v1",
+						"boardgames",
+						"{{id_boardgame}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PATCH_duration changes",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status test\", () =>  {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"api_url = pm.variables.get(\"api.url\");\r",
+							"id_boardgame = pm.variables.get(\"id_boardgame\");\r",
+							"\r",
+							"request = {\r",
+							"  url: api_url+\"/v1/boardgames/\"+id_boardgame , \r",
+							"  method: 'GET'}\r",
+							"\r",
+							"\r",
+							"pm.sendRequest(request ,  (err, response) => {\r",
+							"\r",
+							"    pm.test(\"Duration changes\", () =>  {\r",
+							"\r",
+							"    responseGet = response.json();\r",
+							"    pm.expect(responseGet).to.not.be.null;\r",
+							"    pm.expect(responseGet.name).to.eql('test_jeu');\r",
+							"    pm.expect(responseGet.minplayer).to.eql(1);\r",
+							"    pm.expect(responseGet.maxplayer).to.eql(4);\r",
+							"    pm.expect(responseGet.duration).to.eql(120);\r",
+							"    pm.expect(responseGet.publisher).to.eql('new_publisher');\r",
+							"    pm.expect(responseGet.authors).to.be.an('array').that.is.not.empty;\r",
+							"    pm.expect(responseGet.authors).to.have.lengthOf(1);\r",
+							"    pm.expect(responseGet.authors[0].id).to.eql(\"fc6bcbdc-96d1-415d-b226-b1a6c4d40438\");\r",
+							"    pm.expect(responseGet.authors[0].firstName).to.eql(\"Stefan\");\r",
+							"    pm.expect(responseGet.authors[0].lastName).to.eql(\"Feld\");\r",
+							"});\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": \"{{id_boardgame}}\",\r\n\r\n  \"duration\": 120\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api.url}}/v1/boardgames/{{id_boardgame}}",
+					"host": [
+						"{{api.url}}"
+					],
+					"path": [
+						"v1",
+						"boardgames",
+						"{{id_boardgame}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE_newgame",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status test\", () =>  {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"api_url = pm.variables.get(\"api.url\");\r",
+							"cat_id = pm.variables.get(\"id_cat\");\r",
+							"\r",
+							"request = {\r",
+							"  url: api_url+\"/v1/cats/\"+cat_id , \r",
+							"  method: 'GET'}\r",
+							"\r",
+							"pm.sendRequest(request ,  (err, response) => {\r",
+							"\r",
+							"    pm.test(\"Dobby has been erased, return 404, \", () =>  {\r",
+							"\r",
+							"        pm.expect(response.code).to.eql(404);\r",
+							"        pm.expect(response.status).to.eql('NOT FOUND');\r",
+							"        \r",
+							"   \r",
+							"});\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Dobby\",\r\n  \"color\": \"roux\",\r\n  \"id\": \"\",\r\n  \"sex\": \"Male\",\r\n  \"foods\": [\r\n    \"souris\", \"saumon\"\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api.url}}/v1/boardgames/{{id_boardgame}}",
+					"host": [
+						"{{api.url}}"
+					],
+					"path": [
+						"v1",
+						"boardgames",
+						"{{id_boardgame}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
