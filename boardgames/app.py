@@ -3,6 +3,7 @@ from flask import Flask
 from flask_restplus import Api
 from dao.db import db
 from apis.boardgame import api as boardgame_api
+from apis.author import api as author_api
 
 
 app = Flask(__name__)
@@ -17,3 +18,4 @@ api.init_app(app)
 
 
 api.add_namespace(boardgame_api, path='/v1/boardgames')
+api.add_namespace(author_api, path='/v1/authors')

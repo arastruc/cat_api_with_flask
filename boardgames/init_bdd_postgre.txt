@@ -1,17 +1,83 @@
-CREATE TABLE public.boardgame (
-	id serial NOT NULL,
-	boardgame_id uuid NULL DEFAULT uuid_generate_v4(),
-	publisher text NOT NULL,
-	name text NOT NULL,
-	author text NOT NULL,
-	minplayer int4 NOT NULL,
-	maxplayer int4 NOT NULL,
-	duration int4 NOT NULL,
-	CONSTRAINT boardgame_pkey PRIMARY KEY (id)
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+SELECT uuid_generate_v1();
+	 
+CREATE TABLE Boardgame(
+   Id SERIAL  PRIMARY KEY   ,
+   Boardgame_Id uuid DEFAULT uuid_generate_v4 (),
+   Publisher           TEXT    NOT NULL,
+   Name           TEXT    NOT NULL,
+   MinPlayer            INT     NOT NULL,
+   MaxPlayer            INT     NOT NULL,
+   Duration            INT     NOT NULL
 );
 
-INSERT INTO Boardgame (Name,Publisher,MinPlayer,MaxPlayer,Author,Duration) VALUES
-	 ('Cappuccino','Matagot',2,4,'Charles Chevallier',15),
-	 ('Carpe Diem','Alea',2,4,'Stefan Feld',75),
-	 ('Nidavelir','GRRE Games',2,5,'Serge Laget',45),
-	 ('Bastille','Queen Games',3,4,'Christophe Behre',60);
+
+CREATE TABLE Author (
+	Id serial NOT NULL,
+	Author_Id uuid DEFAULT uuid_generate_v4 (),
+	First_Name text NOT NULL,
+	Last_Name text NOT NULL,
+	Nationality text NOT NULL,
+	Birth_Date DATE,
+	CONSTRAINT author_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE author_boardgame (
+  author_id    int REFERENCES Author (id) ON UPDATE cascade ON DELETE cascade,
+  boardgame_id int REFERENCES Boardgame (id) ON UPDATE cascade ON DELETE cascade,
+
+CONSTRAINT author_boardgame_pkey PRIMARY KEY (author_id, boardgame_id)  -- explicit pk
+);
+
+INSERT INTO Boardgame (Name,Publisher,MinPlayer,MaxPlayer,Duration) VALUES
+	 ('Cappuccino','Matagot',2,4,15),
+	 ('Carpe Diem','Alea',2,4,75),
+	 ('Nidavelir','GRRE Games',2,5,45),
+	 ('Bastille','Queen Games',3,4,60),
+	('Isle of Skye','LookoutSpiele',2,5,60);
+	
+
+
+INSERT INTO Author (First_Name,Last_Name,Nationality,Birth_date) VALUES
+	 ('Stefan','Feld','Allemande','1970-05-01'),
+	 	 ('Serge','Laget','Française',null),
+	 ('Christophe','Behre', 'Allemande',null),
+	 ('Charles','Chevallier','Française','1966-11-04'),
+	 ('Alexander','Pfister','Autrichienne','1966-11-04'),
+	 ('Andreas','Pelikan','Autrichienne','1973-01-01')
+	;
+
+INSERT INTO author_boardgame (author_id,boardgame_id) VALUES
+	 (4,1),
+	 (1,2),
+	 (2,3),
+	 (3,4),
+	 (5,5),
+	 (6,5)
+	;
+
+SELECT *
+FROM author_boardgame ab
+JOIN boardgame b ON ab.boardgame_id = b.id
+JOIN author a ON ab.author_id = a.id;
+
+
+SELECT a.author_id 
+FROM author_boardgame ab
+JOIN boardgame b ON ab.boardgame_id = b.id
+JOIN author a ON ab.author_id = a.id
+where b.boardgame_id = 'a9b84e7a-9849-4bf1-9e49-6333e516ea7e';
+
+	
+
+
+drop table boardgame;
+drop table author;
+drop table author_boardgame;
+
+select * from author
+
+select *from boardgame;
+	

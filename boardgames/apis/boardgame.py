@@ -1,33 +1,48 @@
 import uuid
-from dao.models import Boardgame
+from dao.models import Boardgame, Author
 from flask_restplus import Namespace, Resource, fields
 from flask import Response
-import uuid
 
 from dao.db import db
 
 
 api = Namespace('boardgames', description='Boardgames related operations')
 
+minifiedAuthors = api.model(
+    'authors',
+    {'id': fields.String(description='The id',  attribute="author_id",
+                         required=True),
+     'firstName': fields.String(description='The author first_name',
+                                attribute="first_name"),
+     'lastName': fields.String(description='The author last_name',
+                               attribute="last_name")}
+
+)
+
 boardgame = api.model(
     'Boardgame',
     {'id': fields.String(description='The id', attribute="boardgame_id"),
      'name': fields.String(description='The name', required=True),
      'publisher': fields.String(description='The color', required=True),
-     'minplayer': fields.Integer(description='The minimum required number of player'),
-     'maxplayer': fields.Integer(description='The maximum number of player'),
-     'duration': fields.Integer(description='The duration of the game (in min)'),
-     'author': fields.String(description='The author of the game', required=True),
+     'minplayer': fields.Integer(
+         description='The minimum required number of player'),
+     'maxplayer': fields.Integer(
+         description='The maximum number of player'),
+     'duration': fields.Integer(
+         description='The duration of the game (in min)'),
+     'authors': fields.List(fields.Nested(minifiedAuthors),
+                            description='List of authors', required=True),
      })
 
 boardgame_list = {
-    'boardgames': fields.List(fields.Nested(boardgame), description='List of boardgames'),
+    'datas': fields.List(fields.Nested(boardgame),
+                         description='List of boardgames'),
 }
 
 
 @ api.route('')
 class BoardgamesHandler(Resource):
-    '''handle cats'''
+    '''handle boardgames'''
 
     # Add a security to check that parameters are integers
 
@@ -36,7 +51,8 @@ class BoardgamesHandler(Resource):
     @ api.doc(responses={500: 'Internal Error'})
     @ api.marshal_with(boardgame_list)
     def get(self):
-        return {'boardgames': Boardgame.query.all()}
+
+        return {'datas': Boardgame.query.all()}
 
     @ api.doc(body=boardgame)
     @ api.doc(responses={201: 'Created'})
@@ -46,9 +62,15 @@ class BoardgamesHandler(Resource):
     @ api.expect(boardgame, validate=True)
     def post(self):
         body = api.payload
-        print(body)
+
         del body["id"]
         body["boardgame_id"] = str(uuid.uuid4())
+
+        authors_id = [author.get("id") for author in body["authors"]]
+        authors = [Author.query.filter_by(
+            author_id=id).first_or_404() for id in authors_id]
+
+        body["authors"] = authors
 
         db.session.add(Boardgame(**body))
         db.session.commit()
@@ -60,7 +82,7 @@ class BoardgamesHandler(Resource):
 @ api.route('/<id>')
 class BoardgameHandler(Resource):
 
-    '''handle single cat'''
+    '''handle single boardgame'''
 
     @ api.doc(params={'id': 'Technical boardgame id'})
     @ api.doc(responses={200: 'OK'})
@@ -84,10 +106,8 @@ class BoardgameHandler(Resource):
         if not is_uuid4(id):
             return api.abort(404)
 
-        boardgame_to_delete = Boardgame.query.filter_by(
-            boardgame_id=id).first_or_404()
-
-        db.session.delete(boardgame_to_delete)
+        db.session.delete(Boardgame.query.filter_by(
+            boardgame_id=id).first_or_404())
         db.session.commit()
         db.session.close()
         return Response(status=204)
@@ -103,12 +123,27 @@ class BoardgameHandler(Resource):
         if not is_uuid4(id):
             return api.abort(404)
 
-        Boardgame.query.filter_by(boardgame_id=id).first_or_404()
-
         body = api.payload
-        del body["id"]
 
-        Boardgame.query.filter_by(boardgame_id=id).update({**body})
+        # retrieve the boardgame to update
+        boardgame_to_update = Boardgame.query.filter_by(
+            boardgame_id=id).first_or_404()
+
+        # retrieve the authors
+        authors_id = [author.get("id") for author in body["authors"]]
+        authors = [Author.query.filter_by(
+            author_id=id).first_or_404() for id in authors_id]
+
+        # reindexing and capture of the id
+        body["boardgame_id"] = body["id"]
+        body["id"] = boardgame_to_update.id
+
+        boardgame_to_update = Boardgame(**body)
+        boardgame_to_update.authors = authors
+
+        db.session.merge(boardgame_to_update)
+
+        # Boardgame.query.filter_by(boardgame_id=id).update(boardgame_to_delete)
         db.session.commit()
         db.session.close()
 
@@ -123,13 +158,24 @@ class BoardgameHandler(Resource):
     def patch(self, id):
         body = api.payload
 
-        Boardgame.query.filter_by(
+        boardgame_to_patch = Boardgame.query.filter_by(
             boardgame_id=id).first_or_404()
 
-        del body["id"]
-        body = api.payload
+        # retrieve the authors
+        if body.get("authors"):
+            authors_id = [author.get("id") for author in body["authors"]]
+            authors = [Author.query.filter_by(
+                author_id=id).first_or_404() for id in authors_id]
+            boardgame_to_patch.authors = authors
+            del body["authors"]
 
-        Boardgame.query.filter_by(boardgame_id=id).update({**body})
+        # tour de passe passe pour eviterde forunir un id dans update
+        if body.get("id"):
+            del body["id"]
+
+        Boardgame.query.filter_by(
+            boardgame_id=id).update(body)
+
         db.session.commit()
         db.session.close()
 
